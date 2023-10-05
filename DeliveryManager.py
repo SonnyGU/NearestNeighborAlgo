@@ -3,68 +3,82 @@ import datetime
 from Package import Package
 
 
+# Manages the delivery of packages based on their proximity to the truck's current location.
 class DeliveryManager:
+    returned_to_hub = False  # initialize the flag
+
     def __init__(self, truck, distances, addresses):
+        # truck: The truck instance that will deliver packages.
+        # - distances: A 2D list representing distances between addresses.
+        # - addresses: A list of addresses where each address has a unique ID.
         self.truck = truck
         self.distances = distances
         self.addresses = addresses
 
+    # Calculate the distance between two address IDs.
     def get_distance_between_addresses(self, x, y):
         distance = self.distances[x][y]
         if distance == '':
             distance = self.distances[y][x]
         return float(distance)
 
+    # Retrieve the ID for a given address
     @staticmethod
     def get_address_id_from_literal(address, addresses):
         for row in addresses:
             if address in row[2]:
                 return int(row[0])
 
-    @staticmethod
-    def find_nearest_package_address(current_address, addresses, distances):
-        current_address_id = DeliveryManager.get_address_id_from_literal(current_address, addresses)
-        closest_distance = float('inf')
-        closest_package = None
-
-        for package in addresses:
-            package_address = package[1]
-            package_address_id = DeliveryManager.get_address_id_from_literal(package_address, addresses)
-            if package_address == current_address:
-                continue  # skip comparing the same addresses
-            distance = distances[current_address_id][package_address_id]
-
-            if distance < closest_distance:
-                closest_distance = distance
-                closest_package = package
-
-                return closest_package[1]
-
     def delivering_packages(self):
-        not_delivered = [Package.get_by_id(packageID) for packageID in self.truck.packages]
-        delivered = []
+        #  Initialize an 'on_truck' list
+        on_truck = [Package.get_by_id(pkg_id) for pkg_id in self.truck.packages]
 
-        while not_delivered:
-            current_address = self.truck.current_location
+        #  Empty the truck's package list
+        self.truck.packages = []
 
-            # Calculate distances for all undelivered packages
-            distances = [
-                (package, self.get_distance_between_addresses(
-                    self.get_address_id_from_literal(current_address, self.addresses),
+        #  Delivery loop
+        while on_truck:
+            #  Find the closest package
+            closest_package = None
+            closest_distance = float('inf')
+            for package in on_truck:
+                distance = self.get_distance_between_addresses(
+                    self.get_address_id_from_literal(self.truck.current_location, self.addresses),
                     self.get_address_id_from_literal(package.street, self.addresses)
-                )) for package in not_delivered
-            ]
+                )
+                if distance < closest_distance:
+                    closest_distance = distance
+                    closest_package = package
 
-            # Sort packages based on distance
-            distances.sort(key=lambda x: x[1])
+            # If no closest package was found (though unlikely), break the loop
+            if not closest_package:
+                break
 
-            # Pick the closest package
-            next_package, distance = distances[0]
-
-            self.truck.mileage += distance
-            self.truck.current_location = next_package.street
-            time_to_add = datetime.timedelta(hours=distance / self.truck.speed)
+            #  Update truck details
+            self.truck.mileage += closest_distance
+            time_to_add = datetime.timedelta(hours=closest_distance / self.truck.speed)
             self.truck.time += time_to_add
+            self.truck.current_location = closest_package.street
 
-            delivered.append(next_package)
-            not_delivered.remove(next_package)
+            # 6. Update package details
+            closest_package.deliver_time = self.truck.time
+            if closest_package.depart_time is None:
+                closest_package.depart_time = self.truck.depart_time
+
+            # 7. Remove delivered package from 'on_truck' list
+            on_truck.remove(closest_package)
+
+        if not DeliveryManager.returned_to_hub:  # Check the flag here
+            hub_address_id = self.get_address_id_from_literal("4001 South 700 East", self.addresses)
+            distance_to_hub = self.get_distance_between_addresses(
+                self.get_address_id_from_literal(self.truck.current_location, self.addresses),
+                hub_address_id
+            )
+
+            # Update truck details for return to hub
+            self.truck.mileage += distance_to_hub
+            time_to_add = datetime.timedelta(hours=distance_to_hub / self.truck.speed)
+            self.truck.time += time_to_add
+            self.truck.current_location = "4001 South 700 East"
+
+            self.returned_to_hub = True  # Set the flag to True after the truck returns

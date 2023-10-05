@@ -1,15 +1,11 @@
 class HashTable:
-    def __init__(self, cap=400):
+    def __init__(self, cap=50):
         self.table = [None] * cap  # initializes all field to None
         self.deleted = "Deleted"  # Marker for a deleted item
 
+    #  Reset the hash table, clearing all stored items.
     def clear_table(self):
         self.table = [None] * len(self.table)
-
-    def display(self):
-        for idx, entry in enumerate(self.table):
-            if entry is not None and entry != self.deleted:
-                print(f"Index: {idx}, Key: {entry[0]}, Value: {entry[1]}")
 
     def _hash(self, key):
         return sum(ord(char) for char in str(key))  # hashing the key
@@ -44,4 +40,8 @@ class HashTable:
         idx = self._probe(key)
 
         if self.table[idx] is not None and self.table[idx][0] == key:
-            self.table[idx] = self.deleted
+            self.table[idx] = self.deleted  # Remove an entry from the hash table based on its key.
+
+    def keys(self):
+        return [entry[0] for entry in self.table if entry is not None and entry != self.deleted]  # Return a list of
+        # all active keys in the hash table
