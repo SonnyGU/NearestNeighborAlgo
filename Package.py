@@ -85,13 +85,16 @@ class Package:
             self.status = "Delivered"
         #  catches the error of address and fixes it at the appropriate time
         if self.ID == 9:
-            if time_change > datetime.timedelta(hours=10, minutes=20):
+            if time_change >= datetime.timedelta(hours=10, minutes=20):
                 self.street = "410 S. State St"
                 self.zip_code = "84111"
                 self.city = "UT"
-            else:
-                self.street = self.street
-                self.zip_code = self.zip_code
+                self.status = self.status + " Delayed"
+            else: # add elif for other time to change it back
+                self.street = "300 State St"
+                self.zip_code = "84103"
+                self.state = "UT"
+                self.city = "Salt Lake City"
 
     """
         Loads package details from a CSV file and saves them in a hash table.
