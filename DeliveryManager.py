@@ -65,6 +65,7 @@ class DeliveryManager:
             if closest_package.depart_time is None:
                 closest_package.depart_time = self.truck.depart_time
 
+            closest_package.truck_name = self.truck.name
             # 7. Remove delivered package from 'on_truck' list
             on_truck.remove(closest_package)
 

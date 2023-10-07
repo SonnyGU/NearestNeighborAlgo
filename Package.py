@@ -3,38 +3,6 @@ import csv
 from HashTable import HashTable
 
 
-def get_package_status():
-    """
-    Prompts user for a specific time and package ID.
-    Displays the status of the specified package (or all packages) at the given time.
-    """
-    time_input = input("Enter the time (HH:MM) to check status: ")
-    hours, minutes = map(int, time_input.split(':'))
-    time_to_check = datetime.timedelta(hours=hours, minutes=minutes)
-
-    package_id_input = input("Enter the Package ID or press Enter to see all packages: ")
-
-    # If user provides an ID, we just take that ID.
-    # If user just presses Enter, we take all IDs.
-    single_entry = [int(package_id_input)] if package_id_input else range(1, 41)
-
-    for packageID in single_entry:
-        package = Package.get_by_id(packageID)
-        if package:
-            package.status_update(time_to_check)
-
-            # base output
-            output = (f"Package ID: {package.ID}, Address: {package.street}, {package.city}, {package.state} "
-                      f"{package.zip_code}, Status at {time_to_check}: {package.status}")
-
-            # if package delivered, append delivery time to output
-            if package.status == "Delivered":
-                output += f", Delivery Time: {package.deliver_time}"
-            print(output)
-        else:
-            print(f"Package with ID {packageID} not found.")
-
-
 def get_time_or_default():
     """
     Gets a time from user with default value set to end of business day.
@@ -51,32 +19,9 @@ def get_time_or_default():
         return default_end_time  # Default to end of day.
 
 
-def get_time_range():
-    """
-    Gets start and end time from user with default values set to business hours.
-    Returns: tuple containing start and end times as datetime.timedelta objects.
-    """
-    default_start_time = datetime.timedelta(hours=8)  # 8:00am
-    default_end_time = datetime.timedelta(hours=17)  # 5:00pm
-    start_time_input = input("Enter the start time (HH:MM) of leave blank: ")
-    start_time = default_start_time
-    if start_time_input:
-        # if input is given, update the start_time
-        start_hours, start_minutes = map(int, start_time_input.split(':'))
-        start_time = datetime.timedelta(hours=start_hours, minutes=start_minutes)
-
-    end_time_input = input("Enter the end time (HH:MM) or leave blank if none: ")
-    end_time = default_end_time
-    if end_time_input:  # updates if input is given
-        end_hours, end_minutes = map(int, end_time_input.split(':'))
-        end_time = datetime.timedelta(hours=end_hours, minutes=end_minutes)
-
-    return start_time, end_time
-
-
 # Package outline
 class Package:
-    def __init__(self, ID, street, city, state, zip_code, deadline, weight, notes):
+    def __init__(self, ID, street, city, state, zip_code, deadline, weight, notes, truck_name=None):
         self.ID = ID
         self.street = street
         self.city = city
@@ -88,6 +33,7 @@ class Package:
         self.depart_time = None
         self.deliver_time = None
         self.status = "At the Hub"  # default status will update when package is on move
+        self.truck_name = truck_name
 
     def __str__(self):
         return (f"ID: {self.ID}, Address: {self.street}, {self.city}, {self.state} {self.zip_code}, "
@@ -114,6 +60,7 @@ class Package:
                 self.zip_code = "84111"
                 self.city = "UT"
                 self.status = self.status + " Delayed"
+
             else:  # add elif for other time to change it back
                 self.street = "300 State St"
                 self.zip_code = "84103"
@@ -145,34 +92,11 @@ class Package:
                 #  saves to hash table
                 cls.pkg_holder.insert(pkg_id, pkg)
 
-    @classmethod
-    def print_status_for_time_range(cls, start_time, end_time):
-        print(f"Package Status between {start_time} and {end_time}:\n")
 
-        for pkg_id in sorted(cls.pkg_holder.keys()):
-            package = cls.get_by_id(pkg_id)
 
-            package.status_update(start_time)  # update the status for the given start time
-            start_status = package.status
 
-            package.status_update(end_time)  # update the status for the given end time
-            end_status = package.status
-
-            # Check if delivery time is within the user-specified range
-            if package.deliver_time and start_time <= package.deliver_time <= end_time:
-                print(
-                    f"Package ID: {package.ID}, Address: {package.street}, {package.city}, {package.state} {package.zip_code}, "
-                    f"Status at {start_time}: {start_status}, Status at {end_time}: {end_status}, "
-                    f"Delivery Time: {package.deliver_time}")
-            else:
-                print(
-                    f"Package ID: {package.ID}, Address: {package.street}, {package.city}, {package.state} {package.zip_code}, "
-                    f"Status at {start_time}: {start_status}, Status at {end_time}: {end_status}")
-
-    def print_details(self, choice):
-        print(
-            f"Package ID: {self.ID}, Address: {self.street}, {self.city}, {self.state} {self.zip_code}, Status: {self.status}")
 
     @classmethod
     def get_by_id(cls, package_ID):
         return cls.pkg_holder.search(package_ID)
+
