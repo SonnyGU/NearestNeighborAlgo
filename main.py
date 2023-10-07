@@ -45,15 +45,19 @@ def main():
 
     # Simple cmdline loop
     while True:
-        print("\n***************************************")
+        print("\nThe Western Governors University Parcel Service (WGUPS)")
+        print("***************************************")
         print("1. Print Basic Package Info")
         print("2. Print Package Info with Deadline, Weight, and Depart Time")
         print("3. Print Full Info with Truck Details")
         print("4. Exit the Program")
         print("***************************************")
 
-        choice = input("Enter your choice: ")
+        choice = input("\nEnter your choice: ")
 
+        if choice == '4':
+            print("Exiting the program.")
+            break
         time_to_check = get_time_or_default()
         package_id_input = input("Enter the Package ID or press Enter to see all packages: ")
 
