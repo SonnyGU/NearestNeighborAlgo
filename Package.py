@@ -22,9 +22,33 @@ def get_package_status():
         package = Package.get_by_id(packageID)
         if package:
             package.status_update(time_to_check)
-            print(f"Package ID: {package.ID}, Status: {package.status}, Delivery Time: {package.deliver_time}")
+
+            # base output
+            output = (f"Package ID: {package.ID}, Address: {package.street}, {package.city}, {package.state} "
+                      f"{package.zip_code}, Status at {time_to_check}: {package.status}")
+
+            # if package delivered, append delivery time to output
+            if package.status == "Delivered":
+                output += f", Delivery Time: {package.deliver_time}"
+            print(output)
         else:
             print(f"Package with ID {packageID} not found.")
+
+
+def get_time_or_default():
+    """
+    Gets a time from user with default value set to end of business day.
+    Returns: a datetime.timedelta object representing the time.
+    """
+    default_end_time = datetime.timedelta(hours=24, minutes=0)  # 11:58pm
+    time_input = input("Enter a time (HH:MM) to view package status at that moment, or press ENTER to see status at "
+                       "end of day:  ")
+
+    if time_input:  # If the user entered a time.
+        hours, minutes = map(int, time_input.split(':'))
+        return datetime.timedelta(hours=hours, minutes=minutes)
+    else:
+        return default_end_time  # Default to end of day.
 
 
 def get_time_range():
@@ -90,7 +114,7 @@ class Package:
                 self.zip_code = "84111"
                 self.city = "UT"
                 self.status = self.status + " Delayed"
-            else: # add elif for other time to change it back
+            else:  # add elif for other time to change it back
                 self.street = "300 State St"
                 self.zip_code = "84103"
                 self.state = "UT"
@@ -101,6 +125,7 @@ class Package:
         Args:
         - filename (str): Path to the CSV file containing package details.
         """
+
     @classmethod
     def load_from_csv(cls, filename):
         with open(filename) as packages_file:
@@ -144,7 +169,7 @@ class Package:
                     f"Package ID: {package.ID}, Address: {package.street}, {package.city}, {package.state} {package.zip_code}, "
                     f"Status at {start_time}: {start_status}, Status at {end_time}: {end_status}")
 
-    def print_details(self):
+    def print_details(self, choice):
         print(
             f"Package ID: {self.ID}, Address: {self.street}, {self.city}, {self.state} {self.zip_code}, Status: {self.status}")
 

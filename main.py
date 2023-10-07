@@ -6,7 +6,7 @@ import datetime
 
 from DataLoader import DataLoader
 from DeliveryManager import DeliveryManager
-from Package import Package, get_package_status, get_time_range
+from Package import Package, get_time_or_default
 from Truck import Truck
 
 
@@ -46,44 +46,56 @@ def main():
     # Simple cmdline loop
     while True:
         print("\n***************************************")
-        print("1. Print All Packages’ Information (including Statuses [“At Hub”, “En Route”, “Delivered’])")
-        print("2. Print All Information (including Status) of a given Package at a Given Time")
+        print("1. Begin Package Printing Process")
+        print("2. Includes total mileage")
         print("3. Exit the Program")
         print("***************************************")
 
         choice = input("Enter your choice: ")
 
-        if choice == '1':
-            for pkg_id in Package.pkg_holder.keys():
-                pkg = Package.get_by_id(pkg_id)
-                pkg.print_details()
-
-        elif choice == '2':
-            start_time, end_time = get_time_range()
+        if choice == '1' or '2':
+            time_to_check = get_time_or_default()
             package_id_input = input("Enter the Package ID or press Enter to see all packages: ")
 
-            if package_id_input:  # If a specific package ID is given
+            # if a specific package ID is given
+            if package_id_input:
                 package_id = int(package_id_input)
                 pkg = Package.get_by_id(package_id)
                 if pkg:
-                    if not end_time:  # if only start time is given
-                        pkg.status_update(start_time)
-                        print(f"Package ID: {pkg.ID}, Status at {start_time}: {pkg.status}")
-                    else:  # if both start and end time is given
-                        pkg.status_update(start_time)
-                        start_status = pkg.status
-                        pkg.status_update(end_time)
-                        end_status = pkg.status
-                        print(
-                            f"Package ID: {pkg.ID}, Status at {start_time}: {start_status}, Status at {end_time}: {end_status}")
+                    pkg.status_update(time_to_check)
+                    # base output
+                    output = (f"Package ID: {pkg.ID}, Address: {pkg.street}, {pkg.city}, {pkg.state} {pkg.zip_code}, "
+                              f"Status at {time_to_check}: {pkg.status}")
+
+                    # If package is delivered, append delivery time to output
+                    if pkg.status == "Delivered":
+                        output += f", Delivery Time: {pkg.deliver_time}"
+                    print(output)
+                    print(f"\nTotal Mileage Travelled by All Trucks: {total_mileage:.2f} miles")
                 else:
                     print(f"Package with ID {package_id} not found.")
-            else:  # If no specific package ID is given, display all packages
-                if not end_time:
-                    get_package_status()
-                else:
-                    Package.print_status_for_time_range(start_time, end_time)
-            print(f"\nTotal Mileage Travelled by All Trucks: {total_mileage:.2f} miles")
+
+            # if no specific package ID is given
+            else:
+                for pkg_id in Package.pkg_holder.keys():
+                    pkg = Package.get_by_id(pkg_id)
+                    pkg.status_update(time_to_check)
+
+                    if time_to_check > datetime.timedelta(hours=23, minutes=58):
+                        status_time = "end of day"
+                    else:
+                        status_time = str(time_to_check)
+                    # Base output
+                    output = (f"Package ID: {pkg.ID}, Address: {pkg.street}, {pkg.city}, {pkg.state} {pkg.zip_code}, "
+                              f"Status at {status_time}: {pkg.status}")
+
+                    # If package is delivered, append delivery time to output
+                    if pkg.status == "Delivered" or "Delivered Delayed":
+                        output += f", Delivery Time: {pkg.deliver_time}"
+
+                    print(output)
+                if choice == '2':
+                    print(f"\nTotal Mileage Travelled by All Trucks: {total_mileage:.2f} miles")
 
         elif choice == '3':
             print("Exiting the program.")

@@ -43,5 +43,5 @@ class HashTable:
             self.table[idx] = self.deleted  # Remove an entry from the hash table based on its key.
 
     def keys(self):
-        return [entry[0] for entry in self.table if entry is not None and entry != self.deleted]  # Return a list of
+        return sorted([entry[0] for entry in self.table if entry is not None and entry != self.deleted])  # Return a list of
         # all active keys in the hash table
