@@ -92,11 +92,6 @@ class Package:
                 #  saves to hash table
                 cls.pkg_holder.insert(pkg_id, pkg)
 
-
-
-
-
     @classmethod
-    def get_by_id(cls, package_ID):
-        return cls.pkg_holder.search(package_ID)
-
+    def get_by_id(cls, package_id):
+        return cls.pkg_holder.search(package_id)
