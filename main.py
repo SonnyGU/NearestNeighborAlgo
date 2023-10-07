@@ -68,7 +68,7 @@ def main():
                               f"Status at {time_to_check}: {pkg.status}")
 
                     # If package is delivered, append delivery time to output
-                    if pkg.status == "Delivered":
+                    if pkg.status == "Delivered" or pkg.status == "Delivered Delayed":
                         output += f", Delivery Time: {pkg.deliver_time}"
                     print(output)
                     print(f"\nTotal Mileage Travelled by All Trucks: {total_mileage:.2f} miles")
@@ -90,7 +90,7 @@ def main():
                               f"Status at {status_time}: {pkg.status}")
 
                     # If package is delivered, append delivery time to output
-                    if pkg.status == "Delivered" or "Delivered Delayed":
+                    if pkg.status == "Delivered" or pkg.status == "Delivered Delayed":
                         output += f", Delivery Time: {pkg.deliver_time}"
 
                     print(output)
