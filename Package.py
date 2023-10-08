@@ -58,7 +58,6 @@ class Package:
             if time_change >= datetime.timedelta(hours=10, minutes=20):
                 self.street = "410 S. State St"
                 self.zip_code = "84111"
-                self.city = "UT"
                 self.status = self.status + " Delayed"
 
             else:  # add elif for other time to change it back

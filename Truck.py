@@ -5,12 +5,9 @@ class Truck:
         self.depart_time = depart_time
         self.packages = packages
         self.current_location = current_location
-        self.speed = 18 # default speed for truck
+        self.speed = 18  # default speed for truck
         self.time = depart_time
         self.name = name
 
     def __str__(self):
         return f"{self.mileage},{self.depart_time},{self.packages},{self.current_location}, {self.speed}"
-
-
-

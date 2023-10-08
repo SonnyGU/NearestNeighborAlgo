@@ -42,6 +42,10 @@ class DeliveryManager:
             closest_package = None
             closest_distance = float('inf')
             for package in on_truck:
+                print(package.ID)
+                print(package.street)
+                if package.ID == 9:
+                    package.street = "410 S State St"
                 distance = self.get_distance_between_addresses(
                     self.get_address_id_from_literal(self.truck.current_location, self.addresses),
                     self.get_address_id_from_literal(package.street, self.addresses)

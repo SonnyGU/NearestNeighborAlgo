@@ -21,7 +21,7 @@ def main():
     distances = DataLoader.load_csv("CSVFiles/distanceCSV.csv")
 
     # initializing trucks and loading info into deliveryManager instances
-    truck1 = Truck(0.0, datetime.timedelta(hours=8), [15, 14, 20, 16, 13, 1, 34, 29, 30, 31, 40, 33, 2, 21],
+    truck1 = Truck(0.0, datetime.timedelta(hours=8), [15, 14, 20, 16, 13, 1, 34, 29, 30, 31, 40, 33, 2, 21, 19],
                    "4001 South 700 East", "Truck 1")
     delivery_manager1 = DeliveryManager(truck1, distances, addresses)
 
@@ -30,7 +30,7 @@ def main():
                    "4001 South 700 East", "Truck 2")
     delivery_manager2 = DeliveryManager(truck2, distances, addresses)
 
-    truck3 = Truck(0.0, datetime.timedelta(hours=10, minutes=30), [9, 8, 32, 28, 17, 21, 4, 11, 12, 19, 22, 23],
+    truck3 = Truck(0.0, datetime.timedelta(hours=10, minutes=30), [9, 8, 32, 28, 17, 21, 4, 11, 12, 22, 23],
                    "4001 South 700 East", "Truck 3")
     delivery_manager3 = DeliveryManager(truck3, distances, addresses)
 
